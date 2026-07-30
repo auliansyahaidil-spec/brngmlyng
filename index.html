@@ -25,28 +25,47 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
-        /* Container Logo di Atas Game */
+        
+        /* Container Banner Logo di Atas Permainan */
         .logo-header {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
-            background: rgba(30, 41, 59, 0.8);
-            padding: 10px 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 400px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            gap: 12px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 2px solid #334155;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            max-width: 380px;
+            width: 100%;
         }
+        
+        .logo-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
         .logo-header img {
-            height: 45px;
-            width: auto;
-            border-radius: 6px;
-            object-fit: contain;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            height: 48px;
+            width: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            background: #000;
         }
+
+        .logo-box span {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
         .game-container {
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -69,57 +88,94 @@
 <body>
 
 <div class="main-wrapper">
+    <!-- Header Logo Gambar di Atas Permainan -->
     <div class="logo-header">
-        <img id="logoSmk" src="https://lh3.googleusercontent.com/d/1--smk_img_id" alt="SMK Logo" title="SMKN 1 Sanden">
-        <img id="logoRpl" src="https://lh3.googleusercontent.com/d/1--rpl_img_id" alt="RPL Logo" title="RPL">
-        <img id="logoMoko" src="https://lh3.googleusercontent.com/d/1--moko_img_id" alt="MOKO Logo" title="MOKO">
-        <img id="logoOon" src="https://lh3.googleusercontent.com/d/1--oon_img_id" alt="ONESANDVOSCHO Logo" title="ONESANDVOSCHO">
-        <img id="logoDhea" src="https://lh3.googleusercontent.com/d/1--dhea_img_id" alt="Dhea Logo" title="Dhea">
+        <div class="logo-box">
+            <img id="imgSmk" alt="SMK">
+            <span>SMK</span>
+        </div>
+        <div class="logo-box">
+            <img id="imgRpl" alt="RPL">
+            <span>RPL</span>
+        </div>
+        <div class="logo-box">
+            <img id="imgMoko" alt="MOKO">
+            <span>MOKO</span>
+        </div>
+        <div class="logo-box">
+            <img id="imgOon" alt="ONESAND">
+            <span>ONESAND</span>
+        </div>
+        <div class="logo-box">
+            <img id="imgDhea" alt="DHEA">
+            <span>DHEA</span>
+        </div>
     </div>
 
+    <!-- Canvas Game -->
     <div class="game-container">
-        <canvas id="gameCanvas" width="380" height="600"></canvas>
+        <canvas id="gameCanvas" width="380" height="580"></canvas>
     </div>
 
     <div class="instructions">
-        Tekan <b>SPASI</b> atau <b>Klik Layar Canvas</b> untuk Terbang / Mulai Ulang
+        Tekan <b>SPASI</b> atau <b>Klik Layar Canvas</b> untuk Terbang / Restart
     </div>
 </div>
 
 <script>
-// Menyiapkan gambar-gambar logo dari file yang diunggah
-const logoUrls = {
-    dhea: 'http://googleusercontent.com/image_generation_content/422',
-    moko: 'https://i.ibb.co/moko.jpeg', // fallback/placeholder jika lokal
-    oon: 'https://i.ibb.co/oon.jpeg',
-    rpl: 'https://i.ibb.co/rpl.jpeg',
-    smk: 'https://i.ibb.co/smk.jpeg'
-};
-
-// Pasang source ke tag img di atas HTML secara otomatis
-document.getElementById('logoDhea').src = logoUrls.dhea;
-
+// Canvas & Context
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// --- AUDIO SYNTHESIZER (Efek Suara Internal) ---
+// MEMUAT GAMBAR LOGO SECARA LANGSUNG DARI CANVAS VECTOR BROWSER
+function generateLogoData() {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 100; tempCanvas.height = 100;
+    const tCtx = tempCanvas.getContext('2d');
+
+    // 1. Logo SMK (Jangkar & Ikan Emas)
+    tCtx.fillStyle = '#1e293b'; tCtx.fillRect(0,0,100,100);
+    tCtx.strokeStyle = '#d97706'; tCtx.lineWidth = 6;
+    tCtx.beginPath(); tCtx.arc(50,50,40,0,Math.PI*2); tCtx.stroke();
+    tCtx.fillStyle = '#f59e0b'; tCtx.font = 'bold 30px sans-serif'; tCtx.fillText('⚓', 35, 65);
+    document.getElementById('imgSmk').src = tempCanvas.toDataURL();
+
+    // 2. Logo RPL (Perisai Komputer)
+    tCtx.fillStyle = '#0f172a'; tCtx.fillRect(0,0,100,100);
+    tCtx.fillStyle = '#2563eb'; tCtx.beginPath(); tCtx.arc(50,50,38,0,Math.PI*2); tCtx.fill();
+    tCtx.fillStyle = '#fff'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('💻', 32, 62);
+    document.getElementById('imgRpl').src = tempCanvas.toDataURL();
+
+    // 3. Logo MOKO (Kubus Modern)
+    tCtx.fillStyle = '#1e293b'; tCtx.fillRect(0,0,100,100);
+    tCtx.fillStyle = '#38bdf8'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🧊', 32, 62);
+    document.getElementById('imgMoko').src = tempCanvas.toDataURL();
+
+    // 4. Logo ONESANDVOSCHO (Kapal/V)
+    tCtx.fillStyle = '#0f172a'; tCtx.fillRect(0,0,100,100);
+    tCtx.fillStyle = '#0284c7'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🚢', 32, 62);
+    document.getElementById('imgOon').src = tempCanvas.toDataURL();
+
+    // 5. Logo Dhea (Burung Phoenix Emas)
+    tCtx.fillStyle = '#2e1065'; tCtx.fillRect(0,0,100,100);
+    tCtx.fillStyle = '#fbbf24'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🦅', 32, 62);
+    document.getElementById('imgDhea').src = tempCanvas.toDataURL();
+}
+generateLogoData();
+
+// --- AUDIO SYNTHESIZER ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new AudioContext();
-    }
+    if (!audioCtx) audioCtx = new AudioContext();
 }
 
 function playSound(type) {
     if (!audioCtx) return;
-    
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
+    osc.connect(gain); gain.connect(audioCtx.destination);
     const now = audioCtx.currentTime;
 
     if (type === 'jump') {
@@ -128,51 +184,41 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(750, now + 0.1);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
     } else if (type === 'score') {
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(523.25, now); 
         osc.frequency.setValueAtTime(659.25, now + 0.08); 
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.start(now);
-        osc.stop(now + 0.25);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
     } else if (type === 'hit') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(160, now);
-        osc.frequency.linearRampToValueAtTime(40, now + 0.22);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-        osc.start(now);
-        osc.stop(now + 0.22);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
     } else if (type === 'levelUp') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(880, now + 0.15);
         gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
     }
 }
 
-// --- VARIABEL GAME ---
+// --- GAME VARIABLES ---
 let frames = 0;
 let score = 0;
 let level = 1;
-let gameState = 'START'; // START, PLAYING, GAMEOVER
+let gameState = 'START';
 
-// --- ASET BURUNG ---
+// --- BURUNG ---
 const bird = {
-    x: 60,
-    y: 200,
-    w: 32,
-    h: 24,
-    gravity: 0.25,
-    jump: 4.6,
-    velocity: 0,
-    rotation: 0,
+    x: 60, y: 200, w: 32, h: 24,
+    gravity: 0.25, jump: 4.5, velocity: 0, rotation: 0,
     
     draw: function() {
         ctx.save();
@@ -183,40 +229,26 @@ const bird = {
         }
         ctx.rotate(this.rotation);
 
-        // Badan Burung
+        // Badan
         ctx.fillStyle = "#FFD700";
-        ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#B8860B";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#B8860B"; ctx.lineWidth = 2; ctx.stroke();
 
         // Mata
         ctx.fillStyle = "#FFF";
-        ctx.beginPath();
-        ctx.arc(6, -4, 5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#000";
-        ctx.beginPath();
-        ctx.arc(7, -4, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(7, -4, 2, 0, Math.PI * 2); ctx.fill();
 
         // Paruh
         ctx.fillStyle = "#FF5722";
-        ctx.beginPath();
-        ctx.moveTo(8, 2);
-        ctx.lineTo(18, 5);
-        ctx.lineTo(8, 9);
-        ctx.closePath();
-        ctx.fill();
+        ctx.beginPath(); ctx.moveTo(8, 2); ctx.lineTo(18, 5); ctx.lineTo(8, 9); ctx.closePath(); ctx.fill();
 
         // Sayap
         ctx.fillStyle = "#F1C40F";
         ctx.beginPath();
         let wingY = Math.sin(frames * 0.25) * 4;
-        ctx.ellipse(-4, wingY, 7, 4, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.ellipse(-4, wingY, 7, 4, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
 
         ctx.restore();
     },
@@ -226,13 +258,10 @@ const bird = {
             this.velocity += this.gravity;
             this.y += this.velocity;
 
-            // Batas Tanah
             if (this.y + 12 >= canvas.height - 70) {
                 this.y = canvas.height - 70 - 12;
                 gameOver();
             }
-
-            // Batas Atas
             if (this.y - 12 <= 0) {
                 this.y = 12;
                 this.velocity = 0;
@@ -246,18 +275,13 @@ const bird = {
     },
 
     reset: function() {
-        this.y = 200;
-        this.velocity = 0;
-        this.rotation = 0;
+        this.y = 200; this.velocity = 0; this.rotation = 0;
     }
 };
 
 // --- RINTANGAN (PIPA) ---
 const pipes = {
-    position: [],
-    w: 52,
-    gap: 125,
-    dx: 2,
+    position: [], w: 52, gap: 125, dx: 2,
 
     draw: function() {
         for (let i = 0; i < this.position.length; i++) {
@@ -266,23 +290,14 @@ const pipes = {
             let bottomY = p.y + this.gap;
 
             // Pipa Atas
-            ctx.fillStyle = "#2ECC71";
-            ctx.fillRect(p.x, 0, this.w, topY);
-            ctx.strokeStyle = "#1E8449";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(p.x, 0, this.w, topY);
-
-            // Bibir Pipa Atas
-            ctx.fillRect(p.x - 3, topY - 20, this.w + 6, 20);
-            ctx.strokeRect(p.x - 3, topY - 20, this.w + 6, 20);
+            ctx.fillStyle = "#2ECC71"; ctx.fillRect(p.x, 0, this.w, topY);
+            ctx.strokeStyle = "#1E8449"; ctx.lineWidth = 3; ctx.strokeRect(p.x, 0, this.w, topY);
+            ctx.fillRect(p.x - 3, topY - 20, this.w + 6, 20); ctx.strokeRect(p.x - 3, topY - 20, this.w + 6, 20);
 
             // Pipa Bawah
             ctx.fillRect(p.x, bottomY, this.w, canvas.height - bottomY - 70);
             ctx.strokeRect(p.x, bottomY, this.w, canvas.height - bottomY - 70);
-
-            // Bibir Pipa Bawah
-            ctx.fillRect(p.x - 3, bottomY, this.w + 6, 20);
-            ctx.strokeRect(p.x - 3, bottomY, this.w + 6, 20);
+            ctx.fillRect(p.x - 3, bottomY, this.w + 6, 20); ctx.strokeRect(p.x - 3, bottomY, this.w + 6, 20);
         }
     },
 
@@ -291,15 +306,11 @@ const pipes = {
 
         let spawnRate = Math.max(75, 115 - level * 5); 
         if (frames % spawnRate === 0) {
-            let minGapY = 60;
-            let maxGapY = canvas.height - 70 - this.gap - 60;
+            let minGapY = 50;
+            let maxGapY = canvas.height - 70 - this.gap - 50;
             let randomY = Math.floor(Math.random() * (maxGapY - minGapY + 1)) + minGapY;
 
-            this.position.push({
-                x: canvas.width,
-                y: randomY,
-                passed: false
-            });
+            this.position.push({ x: canvas.width, y: randomY, passed: false });
         }
 
         for (let i = 0; i < this.position.length; i++) {
@@ -307,18 +318,13 @@ const pipes = {
             p.x -= this.dx;
 
             // Deteksi Tabrakan
-            let birdLeft = bird.x - 12;
-            let birdRight = bird.x + 12;
-            let birdTop = bird.y - 12;
-            let birdBottom = bird.y + 12;
-
-            if (birdRight > p.x && birdLeft < p.x + this.w) {
-                if (birdTop < p.y || birdBottom > p.y + this.gap) {
+            if (bird.x + 12 > p.x && bird.x - 12 < p.x + this.w) {
+                if (bird.y - 12 < p.y || bird.y + 12 > p.y + this.gap) {
                     gameOver();
                 }
             }
 
-            // Hitung Skor & Level
+            // Skor & Level
             if (p.x + this.w < bird.x && !p.passed) {
                 p.passed = true;
                 score++;
@@ -340,36 +346,20 @@ const pipes = {
     },
 
     reset: function() {
-        this.position = [];
-        this.dx = 2;
-        this.gap = 125;
+        this.position = []; this.dx = 2; this.gap = 125;
     }
 };
 
-// --- BACKGROUND & LANDSCAPE ---
+// --- BACKGROUND ---
 const environment = {
     draw: function() {
-        // Awan
         ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
-        ctx.beginPath();
-        ctx.arc(70, 90, 22, 0, Math.PI * 2);
-        ctx.arc(95, 80, 30, 0, Math.PI * 2);
-        ctx.arc(120, 90, 22, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(70, 90, 22, 0, Math.PI * 2); ctx.arc(95, 80, 30, 0, Math.PI * 2); ctx.arc(120, 90, 22, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(270, 140, 18, 0, Math.PI * 2); ctx.arc(290, 130, 26, 0, Math.PI * 2); ctx.arc(310, 140, 18, 0, Math.PI * 2); ctx.fill();
 
-        ctx.beginPath();
-        ctx.arc(270, 140, 18, 0, Math.PI * 2);
-        ctx.arc(290, 130, 26, 0, Math.PI * 2);
-        ctx.arc(310, 140, 18, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Tanah / Ground
-        ctx.fillStyle = "#DDE26A";
-        ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
-        ctx.fillStyle = "#85C1E9";
-        ctx.fillRect(0, canvas.height - 70, canvas.width, 10);
-        ctx.fillStyle = "#2ECC71";
-        ctx.fillRect(0, canvas.height - 70, canvas.width, 6);
+        ctx.fillStyle = "#DDE26A"; ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
+        ctx.fillStyle = "#85C1E9"; ctx.fillRect(0, canvas.height - 70, canvas.width, 10);
+        ctx.fillStyle = "#2ECC71"; ctx.fillRect(0, canvas.height - 70, canvas.width, 6);
     }
 };
 
@@ -378,96 +368,60 @@ function gameOver() {
     playSound('hit');
 }
 
-// --- TAMPILAN SKOR & TEKS ---
 function drawUI() {
-    ctx.fillStyle = "#FFF";
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 3;
+    ctx.fillStyle = "#FFF"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
 
     if (gameState === 'PLAYING') {
         ctx.font = "bold 36px sans-serif";
-        ctx.strokeText(score, canvas.width / 2 - 10, 50);
-        ctx.fillText(score, canvas.width / 2 - 10, 50);
+        ctx.strokeText(score, canvas.width / 2 - 10, 50); ctx.fillText(score, canvas.width / 2 - 10, 50);
 
         ctx.font = "bold 16px sans-serif";
-        ctx.strokeText("Level: " + level, 15, 30);
-        ctx.fillText("Level: " + level, 15, 30);
-    } 
-    else if (gameState === 'START') {
+        ctx.strokeText("Level: " + level, 15, 30); ctx.fillText("Level: " + level, 15, 30);
+    } else if (gameState === 'START') {
         ctx.textAlign = "center";
         ctx.font = "bold 24px sans-serif";
-        ctx.strokeText("BURUNG TERBANG", canvas.width / 2, 210);
-        ctx.fillText("BURUNG TERBANG", canvas.width / 2, 210);
-
+        ctx.strokeText("BURUNG TERBANG", canvas.width / 2, 210); ctx.fillText("BURUNG TERBANG", canvas.width / 2, 210);
         ctx.font = "15px sans-serif";
-        ctx.strokeText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260);
-        ctx.fillText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260);
+        ctx.strokeText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260); ctx.fillText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260);
         ctx.textAlign = "start";
-    } 
-    else if (gameState === 'GAMEOVER') {
+    } else if (gameState === 'GAMEOVER') {
         ctx.textAlign = "center";
-        ctx.font = "bold 30px sans-serif";
-        ctx.fillStyle = "#E74C3C";
-        ctx.strokeText("GAME OVER", canvas.width / 2, 190);
-        ctx.fillText("GAME OVER", canvas.width / 2, 190);
+        ctx.font = "bold 30px sans-serif"; ctx.fillStyle = "#E74C3C";
+        ctx.strokeText("GAME OVER", canvas.width / 2, 190); ctx.fillText("GAME OVER", canvas.width / 2, 190);
 
-        ctx.fillStyle = "#FFF";
-        ctx.font = "20px sans-serif";
-        ctx.strokeText("Skor Akhir: " + score, canvas.width / 2, 250);
-        ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 250);
-
-        ctx.strokeText("Level: " + level, canvas.width / 2, 285);
-        ctx.fillText("Level: " + level, canvas.width / 2, 285);
+        ctx.fillStyle = "#FFF"; ctx.font = "20px sans-serif";
+        ctx.strokeText("Skor Akhir: " + score, canvas.width / 2, 250); ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 250);
+        ctx.strokeText("Level: " + level, canvas.width / 2, 285); ctx.fillText("Level: " + level, canvas.width / 2, 285);
 
         ctx.font = "15px sans-serif";
-        ctx.strokeText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350);
-        ctx.fillText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350);
+        ctx.strokeText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350); ctx.fillText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350);
         ctx.textAlign = "start";
     }
 }
 
-// --- CONTROLLER ---
 function handleInput() {
     initAudio();
-
     if (gameState === 'START') {
-        gameState = 'PLAYING';
-        bird.flap();
+        gameState = 'PLAYING'; bird.flap();
     } else if (gameState === 'PLAYING') {
         bird.flap();
     } else if (gameState === 'GAMEOVER') {
-        pipes.reset();
-        bird.reset();
-        score = 0;
-        level = 1;
-        gameState = 'PLAYING';
+        pipes.reset(); bird.reset();
+        score = 0; level = 1; gameState = 'PLAYING';
     }
 }
 
 document.addEventListener("keydown", function(e) {
-    if (e.code === "Space") {
-        e.preventDefault();
-        handleInput();
-    }
+    if (e.code === "Space") { e.preventDefault(); handleInput(); }
 });
+canvas.addEventListener("click", handleInput);
 
-canvas.addEventListener("click", function() {
-    handleInput();
-});
-
-// --- GAME LOOP ---
 function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     environment.draw();
-
-    pipes.draw();
-    pipes.update();
-
-    bird.draw();
-    bird.update();
-
+    pipes.draw(); pipes.update();
+    bird.draw(); bird.update();
     drawUI();
-
     frames++;
     requestAnimationFrame(loop);
 }
