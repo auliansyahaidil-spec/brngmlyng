@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Burung Terbang</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .game-container {
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: #70c5ce;
+        }
+        .instructions {
+            margin-top: 15px;
+            text-align: center;
+            color: #ccc;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="text-align: center;">
+    <div class="game-container">
+        <canvas id="gameCanvas" width="360" height="640"></canvas>
+    </div>
+    <div class="instructions">
+        Tekan <b>SPASI</b> atau <b>Klik Layar</b> untuk Lompat/Mulai Ulang
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// --- AUDIO SYNTHESIZER (Tanpa File Eksternal) ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new AudioContext();
+    }
+}
+
+function playSound(type) {
+    if (!audioCtx) return;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+
+    if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+    } else if (type === 'score') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+    } else if (type === 'hit') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.2);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+    } else if (type === 'levelUp') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(880, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+    }
+}
+
+// --- VARIABEL UTAMA GAME ---
+let frames = 0;
+let score = 0;
+let level = 1;
+let gameState = 'START'; // START, PLAYING, GAMEOVER
+
+// --- ASET PROPORTIONAL (Tebal Pipa & Burung) ---
+const bird = {
+    x: 50,
+    y: 150,
+    w: 34,
+    h: 24,
+    gravity: 0.25,
+    jump: 4.6,
+    velocity: 0,
+    rotation: 0,
+    
+    draw: function() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        
+        // Rotasi burung berdasarkan kecepatan jatuh
+        if (gameState === 'PLAYING') {
+            this.rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, this.velocity * 0.1));
+        }
+        ctx.rotate(this.rotation);
+
+        // Badan Burung (Kuning)
+        ctx.fillStyle = "#FFD700";
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#D4AC0D";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Mata (Putih & Hitam)
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        ctx.arc(6, -4, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(7, -4, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Paruh (Oranye)
+        ctx.fillStyle = "#FF5722";
+        ctx.beginPath();
+        ctx.moveTo(8, 2);
+        ctx.lineTo(18, 5);
+        ctx.lineTo(8, 9);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sayap (Animasi Kepakan sederhaa)
+        ctx.fillStyle = "#F1C40F";
+        ctx.beginPath();
+        let wingY = Math.sin(frames * 0.2) * 3;
+        ctx.ellipse(-4, wingY, 7, 4, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    },
+
+    update: function() {
+        if (gameState === 'PLAYING') {
+            this.velocity += this.gravity;
+            this.y += this.velocity;
+
+            // Batas Bawah (Tanah)
+            if (this.y + this.h/2 >= canvas.height - 80) {
+                this.y = canvas.height - 80 - this.h/2;
+                gameOver();
+            }
+
+            // Batas Atas
+            if (this.y - this.h/2 <= 0) {
+                this.y = this.h/2;
+                this.velocity = 0;
+            }
+        }
+    },
+
+    flap: function() {
+        this.velocity = -this.jump;
+        playSound('jump');
+    },
+
+    reset: function() {
+        this.y = 150;
+        this.velocity = 0;
+        this.rotation = 0;
+    }
+};
+
+// --- SISTEM RINTANGAN (PIPA) ---
+const pipes = {
+    position: [],
+    w: 52,
+    gap: 120, // Jarak celah atas-bawah
+    dx: 2,   // Kecepatan gerak pipa awal
+
+    draw: function() {
+        for (let i = 0; i < this.position.length; i++) {
+            let p = this.position[i];
+            let topY = p.y;
+            let bottomY = p.y + this.gap;
+
+            // Pipa Atas
+            ctx.fillStyle = "#2ECC71";
+            ctx.fillRect(p.x, 0, this.w, topY);
+            ctx.strokeStyle = "#27AE60";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(p.x, 0, this.w, topY);
+
+            // Bibir Pipa Atas
+            ctx.fillRect(p.x - 3, topY - 20, this.w + 6, 20);
+            ctx.strokeRect(p.x - 3, topY - 20, this.w + 6, 20);
+
+            // Pipa Bawah
+            ctx.fillRect(p.x, bottomY, this.w, canvas.height - bottomY - 80);
+            ctx.strokeRect(p.x, bottomY, this.w, canvas.height - bottomY - 80);
+
+            // Bibir Pipa Bawah
+            ctx.fillRect(p.x - 3, bottomY, this.w + 6, 20);
+            ctx.strokeRect(p.x - 3, bottomY, this.w + 6, 20);
+        }
+    },
+
+    update: function() {
+        if (gameState !== 'PLAYING') return;
+
+        // Tambah pipa baru setiap selang waktu tertentu
+        let spawnRate = Math.max(80, 120 - level * 5); 
+        if (frames % spawnRate === 0) {
+            let minGapY = 50;
+            let maxGapY = canvas.height - 80 - this.gap - 50;
+            let randomY = Math.floor(Math.random() * (maxGapY - minGapY + 1)) + minGapY;
+
+            this.position.push({
+                x: canvas.width,
+                y: randomY,
+                passed: false
+            });
+        }
+
+        for (let i = 0; i < this.position.length; i++) {
+            let p = this.position[i];
+            p.x -= this.dx;
+
+            // Deteksi Tabrakan
+            let birdLeft = bird.x - 12;
+            let birdRight = bird.x + 12;
+            let birdTop = bird.y - 12;
+            let birdBottom = bird.y + 12;
+
+            let pipeLeft = p.x;
+            let pipeRight = p.x + this.w;
+            let pipeTop = p.y;
+            let pipeBottom = p.y + this.gap;
+
+            if (birdRight > pipeLeft && birdLeft < pipeRight) {
+                if (birdTop < pipeTop || birdBottom > pipeBottom) {
+                    gameOver();
+                }
+            }
+
+            // Tambah Skor saat Lewat
+            if (p.x + this.w < bird.x && !p.passed) {
+                p.passed = true;
+                score++;
+                playSound('score');
+
+                // Kenaikan Level setiap 5 poin
+                if (score % 5 === 0) {
+                    level++;
+                    this.dx += 0.3; // Pipa bergerak lebih cepat
+                    this.gap = Math.max(90, this.gap - 3); // Celah makin sempit
+                    playSound('levelUp');
+                }
+            }
+
+            // Hapus pipa yang keluar layar
+            if (p.x + this.w < 0) {
+                this.position.shift();
+                i--;
+            }
+        }
+    },
+
+    reset: function() {
+        this.position = [];
+        this.dx = 2;
+        this.gap = 120;
+    }
+};
+
+// --- Latar Belakang & Tanah ---
+const environment = {
+    draw: function() {
+        // Langit/Awan
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.beginPath();
+        ctx.arc(60, 100, 25, 0, Math.PI * 2);
+        ctx.arc(90, 90, 35, 0, Math.PI * 2);
+        ctx.arc(120, 100, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(260, 180, 20, 0, Math.PI * 2);
+        ctx.arc(285, 170, 30, 0, Math.PI * 2);
+        ctx.arc(310, 180, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tanah / Ground
+        ctx.fillStyle = "#DDE26A";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+        ctx.fillStyle = "#85C1E9";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 12);
+        ctx.fillStyle = "#2ECC71";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 8);
+    }
+};
+
+// --- EFEK GAME OVER ---
+function gameOver() {
+    gameState = 'GAMEOVER';
+    playSound('hit');
+}
+
+// --- UI DISPLAY (Teks Skor & Level) ---
+function drawUI() {
+    ctx.fillStyle = "#FFF";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
+
+    if (gameState === 'PLAYING') {
+        // Skor Utama
+        ctx.font = "bold 35px sans-serif";
+        ctx.strokeText(score, canvas.width / 2 - 10, 50);
+        ctx.fillText(score, canvas.width / 2 - 10, 50);
+
+        // Indicator Level
+        ctx.font = "bold 16px sans-serif";
+        ctx.strokeText("Level: " + level, 15, 30);
+        ctx.fillText("Level: " + level, 15, 30);
+    } 
+    else if (gameState === 'START') {
+        ctx.textAlign = "center";
+        ctx.font = "bold 24px sans-serif";
+        ctx.strokeText("BURUNG TERBANG", canvas.width / 2, 220);
+        ctx.fillText("BURUNG TERBANG", canvas.width / 2, 220);
+
+        ctx.font = "16px sans-serif";
+        ctx.strokeText("Tekan Spasi/Klik untuk Mulai", canvas.width / 2, 280);
+        ctx.fillText("Tekan Spasi/Klik untuk Mulai", canvas.width / 2, 280);
+        ctx.textAlign = "start";
+    } 
+    else if (gameState === 'GAMEOVER') {
+        ctx.textAlign = "center";
+        ctx.font = "bold 30px sans-serif";
+        ctx.fillStyle = "#E74C3C";
+        ctx.strokeText("GAME OVER", canvas.width / 2, 200);
+        ctx.fillText("GAME OVER", canvas.width / 2, 200);
+
+        // Panel Skor Akhir
+        ctx.fillStyle = "#FFF";
+        ctx.font = "20px sans-serif";
+        ctx.strokeText("Skor Akhir: " + score, canvas.width / 2, 260);
+        ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 260);
+
+        ctx.strokeText("Level Mencapai: " + level, canvas.width / 2, 295);
+        ctx.fillText("Level Mencapai: " + level, canvas.width / 2, 295);
+
+        ctx.font = "16px sans-serif";
+        ctx.strokeText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 360);
+        ctx.fillText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 360);
+        ctx.textAlign = "start";
+    }
+}
+
+// --- INPUT CONTROL ---
+function handleInput() {
+    initAudio();
+
+    if (gameState === 'START') {
+        gameState = 'PLAYING';
+        bird.flap();
+    } else if (gameState === 'PLAYING') {
+        bird.flap();
+    } else if (gameState === 'GAMEOVER') {
+        pipes.reset();
+        bird.reset();
+        score = 0;
+        level = 1;
+        gameState = 'PLAYING';
+    }
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.code === "Space") {
+        e.preventDefault();
+        handleInput();
+    }
+});
+
+canvas.addEventListener("click", function() {
+    handleInput();
+});
+
+// --- GAME LOOP ---
+function loop() {
+    // 1. Clear Screen & Draw Background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    environment.draw();
+
+    // 2. Update & Draw Entities
+    pipes.draw();
+    pipes.update();
+
+    bird.draw();
+    bird.update();
+
+    // 3. Draw Interface
+    drawUI();
+
+    frames++;
+    requestAnimationFrame(loop);
+}
+
+// Jalankan Loop
+loop();
+</script>
+</body>
+</html>
