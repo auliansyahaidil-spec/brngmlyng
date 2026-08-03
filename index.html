@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Burung Terbang - Special Edition</title>
+    <title>Game Burung Terbang</title>
     <style>
         * {
             box-sizing: border-box;
@@ -11,244 +11,163 @@
             padding: 0;
         }
         body {
-            background-color: #0f172a;
+            background-color: #1a1a1a;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             color: #fff;
-            padding: 20px 0;
         }
-        .main-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        /* Container Banner Logo di Atas Permainan */
-        .logo-header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            padding: 12px 18px;
-            border-radius: 16px;
-            border: 2px solid #334155;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-            max-width: 380px;
-            width: 100%;
-        }
-        
-        .logo-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .logo-header img {
-            height: 48px;
-            width: 48px;
-            border-radius: 8px;
-            object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            background: #000;
-        }
-
-        .logo-box span {
-            font-size: 10px;
-            color: #94a3b8;
-            font-weight: 600;
-        }
-
         .game-container {
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border-radius: 12px;
             overflow: hidden;
-            border: 2px solid #334155;
         }
         canvas {
             display: block;
             background: #70c5ce;
         }
         .instructions {
-            margin-top: 5px;
+            margin-top: 15px;
             text-align: center;
-            color: #94a3b8;
+            color: #ccc;
             font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-    <!-- Header Logo Gambar di Atas Permainan -->
-    <div class="logo-header">
-        <div class="logo-box">
-            <img id="imgSmk" alt="SMK">
-            <span>SMK</span>
-        </div>
-        <div class="logo-box">
-            <img id="imgRpl" alt="RPL">
-            <span>RPL</span>
-        </div>
-        <div class="logo-box">
-            <img id="imgMoko" alt="MOKO">
-            <span>MOKO</span>
-        </div>
-        <div class="logo-box">
-            <img id="imgOon" alt="ONESAND">
-            <span>ONESAND</span>
-        </div>
-        <div class="logo-box">
-            <img id="imgDhea" alt="DHEA">
-            <span>DHEA</span>
-        </div>
-    </div>
-
-    <!-- Canvas Game -->
+<div style="text-align: center;">
     <div class="game-container">
-        <canvas id="gameCanvas" width="380" height="580"></canvas>
+        <canvas id="gameCanvas" width="360" height="640"></canvas>
     </div>
-
     <div class="instructions">
-        Tekan <b>SPASI</b> atau <b>Klik Layar Canvas</b> untuk Terbang / Restart
+        Tekan <b>SPASI</b> atau <b>Klik Layar</b> untuk Lompat/Mulai Ulang
     </div>
 </div>
 
 <script>
-// Canvas & Context
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// MEMUAT GAMBAR LOGO SECARA LANGSUNG DARI CANVAS VECTOR BROWSER
-function generateLogoData() {
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = 100; tempCanvas.height = 100;
-    const tCtx = tempCanvas.getContext('2d');
-
-    // 1. Logo SMK (Jangkar & Ikan Emas)
-    tCtx.fillStyle = '#1e293b'; tCtx.fillRect(0,0,100,100);
-    tCtx.strokeStyle = '#d97706'; tCtx.lineWidth = 6;
-    tCtx.beginPath(); tCtx.arc(50,50,40,0,Math.PI*2); tCtx.stroke();
-    tCtx.fillStyle = '#f59e0b'; tCtx.font = 'bold 30px sans-serif'; tCtx.fillText('⚓', 35, 65);
-    document.getElementById('imgSmk').src = tempCanvas.toDataURL();
-
-    // 2. Logo RPL (Perisai Komputer)
-    tCtx.fillStyle = '#0f172a'; tCtx.fillRect(0,0,100,100);
-    tCtx.fillStyle = '#2563eb'; tCtx.beginPath(); tCtx.arc(50,50,38,0,Math.PI*2); tCtx.fill();
-    tCtx.fillStyle = '#fff'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('💻', 32, 62);
-    document.getElementById('imgRpl').src = tempCanvas.toDataURL();
-
-    // 3. Logo MOKO (Kubus Modern)
-    tCtx.fillStyle = '#1e293b'; tCtx.fillRect(0,0,100,100);
-    tCtx.fillStyle = '#38bdf8'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🧊', 32, 62);
-    document.getElementById('imgMoko').src = tempCanvas.toDataURL();
-
-    // 4. Logo ONESANDVOSCHO (Kapal/V)
-    tCtx.fillStyle = '#0f172a'; tCtx.fillRect(0,0,100,100);
-    tCtx.fillStyle = '#0284c7'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🚢', 32, 62);
-    document.getElementById('imgOon').src = tempCanvas.toDataURL();
-
-    // 5. Logo Dhea (Burung Phoenix Emas)
-    tCtx.fillStyle = '#2e1065'; tCtx.fillRect(0,0,100,100);
-    tCtx.fillStyle = '#fbbf24'; tCtx.font = 'bold 35px sans-serif'; tCtx.fillText('🦅', 32, 62);
-    document.getElementById('imgDhea').src = tempCanvas.toDataURL();
-}
-generateLogoData();
-
-// --- AUDIO SYNTHESIZER ---
+// --- AUDIO SYNTHESIZER (Tanpa File Eksternal) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
 function initAudio() {
-    if (!audioCtx) audioCtx = new AudioContext();
+    if (!audioCtx) {
+        audioCtx = new AudioContext();
+    }
 }
 
 function playSound(type) {
     if (!audioCtx) return;
+    
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
     const now = audioCtx.currentTime;
 
     if (type === 'jump') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(380, now);
-        osc.frequency.exponentialRampToValueAtTime(750, now + 0.1);
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
     } else if (type === 'score') {
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(523.25, now); 
-        osc.frequency.setValueAtTime(659.25, now + 0.08); 
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
         gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now); osc.stop(now + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
     } else if (type === 'hit') {
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.setValueAtTime(150, now);
         osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now); osc.stop(now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
     } else if (type === 'levelUp') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(440, now);
         osc.frequency.setValueAtTime(880, now + 0.15);
         gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.start(now); osc.stop(now + 0.25);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
     }
 }
 
-// --- GAME VARIABLES ---
+// --- VARIABEL UTAMA GAME ---
 let frames = 0;
 let score = 0;
 let level = 1;
-let gameState = 'START';
+let gameState = 'START'; // START, PLAYING, GAMEOVER
 
-// --- BURUNG ---
+// --- ASET PROPORTIONAL (Tebal Pipa & Burung) ---
 const bird = {
-    x: 60, y: 200, w: 32, h: 24,
-    gravity: 0.25, jump: 4.5, velocity: 0, rotation: 0,
+    x: 50,
+    y: 150,
+    w: 34,
+    h: 24,
+    gravity: 0.25,
+    jump: 4.6,
+    velocity: 0,
+    rotation: 0,
     
     draw: function() {
         ctx.save();
         ctx.translate(this.x, this.y);
         
+        // Rotasi burung berdasarkan kecepatan jatuh
         if (gameState === 'PLAYING') {
             this.rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, this.velocity * 0.1));
         }
         ctx.rotate(this.rotation);
 
-        // Badan
+        // Badan Burung (Kuning)
         ctx.fillStyle = "#FFD700";
-        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = "#B8860B"; ctx.lineWidth = 2; ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#D4AC0D";
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-        // Mata
+        // Mata (Putih & Hitam)
         ctx.fillStyle = "#FFF";
-        ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(6, -4, 5, 0, Math.PI * 2);
+        ctx.fill();
         ctx.fillStyle = "#000";
-        ctx.beginPath(); ctx.arc(7, -4, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(7, -4, 2, 0, Math.PI * 2);
+        ctx.fill();
 
-        // Paruh
+        // Paruh (Oranye)
         ctx.fillStyle = "#FF5722";
-        ctx.beginPath(); ctx.moveTo(8, 2); ctx.lineTo(18, 5); ctx.lineTo(8, 9); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(8, 2);
+        ctx.lineTo(18, 5);
+        ctx.lineTo(8, 9);
+        ctx.closePath();
+        ctx.fill();
 
-        // Sayap
+        // Sayap (Animasi Kepakan sederhaa)
         ctx.fillStyle = "#F1C40F";
         ctx.beginPath();
-        let wingY = Math.sin(frames * 0.25) * 4;
-        ctx.ellipse(-4, wingY, 7, 4, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+        let wingY = Math.sin(frames * 0.2) * 3;
+        ctx.ellipse(-4, wingY, 7, 4, Math.PI / 4, 0, Math.PI * 2);
+        ctx.fill();
 
         ctx.restore();
     },
@@ -258,12 +177,15 @@ const bird = {
             this.velocity += this.gravity;
             this.y += this.velocity;
 
-            if (this.y + 12 >= canvas.height - 70) {
-                this.y = canvas.height - 70 - 12;
+            // Batas Bawah (Tanah)
+            if (this.y + this.h/2 >= canvas.height - 80) {
+                this.y = canvas.height - 80 - this.h/2;
                 gameOver();
             }
-            if (this.y - 12 <= 0) {
-                this.y = 12;
+
+            // Batas Atas
+            if (this.y - this.h/2 <= 0) {
+                this.y = this.h/2;
                 this.velocity = 0;
             }
         }
@@ -275,13 +197,18 @@ const bird = {
     },
 
     reset: function() {
-        this.y = 200; this.velocity = 0; this.rotation = 0;
+        this.y = 150;
+        this.velocity = 0;
+        this.rotation = 0;
     }
 };
 
-// --- RINTANGAN (PIPA) ---
+// --- SISTEM RINTANGAN (PIPA) ---
 const pipes = {
-    position: [], w: 52, gap: 125, dx: 2,
+    position: [],
+    w: 52,
+    gap: 120, // Jarak celah atas-bawah
+    dx: 2,   // Kecepatan gerak pipa awal
 
     draw: function() {
         for (let i = 0; i < this.position.length; i++) {
@@ -290,27 +217,41 @@ const pipes = {
             let bottomY = p.y + this.gap;
 
             // Pipa Atas
-            ctx.fillStyle = "#2ECC71"; ctx.fillRect(p.x, 0, this.w, topY);
-            ctx.strokeStyle = "#1E8449"; ctx.lineWidth = 3; ctx.strokeRect(p.x, 0, this.w, topY);
-            ctx.fillRect(p.x - 3, topY - 20, this.w + 6, 20); ctx.strokeRect(p.x - 3, topY - 20, this.w + 6, 20);
+            ctx.fillStyle = "#2ECC71";
+            ctx.fillRect(p.x, 0, this.w, topY);
+            ctx.strokeStyle = "#27AE60";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(p.x, 0, this.w, topY);
+
+            // Bibir Pipa Atas
+            ctx.fillRect(p.x - 3, topY - 20, this.w + 6, 20);
+            ctx.strokeRect(p.x - 3, topY - 20, this.w + 6, 20);
 
             // Pipa Bawah
-            ctx.fillRect(p.x, bottomY, this.w, canvas.height - bottomY - 70);
-            ctx.strokeRect(p.x, bottomY, this.w, canvas.height - bottomY - 70);
-            ctx.fillRect(p.x - 3, bottomY, this.w + 6, 20); ctx.strokeRect(p.x - 3, bottomY, this.w + 6, 20);
+            ctx.fillRect(p.x, bottomY, this.w, canvas.height - bottomY - 80);
+            ctx.strokeRect(p.x, bottomY, this.w, canvas.height - bottomY - 80);
+
+            // Bibir Pipa Bawah
+            ctx.fillRect(p.x - 3, bottomY, this.w + 6, 20);
+            ctx.strokeRect(p.x - 3, bottomY, this.w + 6, 20);
         }
     },
 
     update: function() {
         if (gameState !== 'PLAYING') return;
 
-        let spawnRate = Math.max(75, 115 - level * 5); 
+        // Tambah pipa baru setiap selang waktu tertentu
+        let spawnRate = Math.max(80, 120 - level * 5); 
         if (frames % spawnRate === 0) {
             let minGapY = 50;
-            let maxGapY = canvas.height - 70 - this.gap - 50;
+            let maxGapY = canvas.height - 80 - this.gap - 50;
             let randomY = Math.floor(Math.random() * (maxGapY - minGapY + 1)) + minGapY;
 
-            this.position.push({ x: canvas.width, y: randomY, passed: false });
+            this.position.push({
+                x: canvas.width,
+                y: randomY,
+                passed: false
+            });
         }
 
         for (let i = 0; i < this.position.length; i++) {
@@ -318,26 +259,38 @@ const pipes = {
             p.x -= this.dx;
 
             // Deteksi Tabrakan
-            if (bird.x + 12 > p.x && bird.x - 12 < p.x + this.w) {
-                if (bird.y - 12 < p.y || bird.y + 12 > p.y + this.gap) {
+            let birdLeft = bird.x - 12;
+            let birdRight = bird.x + 12;
+            let birdTop = bird.y - 12;
+            let birdBottom = bird.y + 12;
+
+            let pipeLeft = p.x;
+            let pipeRight = p.x + this.w;
+            let pipeTop = p.y;
+            let pipeBottom = p.y + this.gap;
+
+            if (birdRight > pipeLeft && birdLeft < pipeRight) {
+                if (birdTop < pipeTop || birdBottom > pipeBottom) {
                     gameOver();
                 }
             }
 
-            // Skor & Level
+            // Tambah Skor saat Lewat
             if (p.x + this.w < bird.x && !p.passed) {
                 p.passed = true;
                 score++;
                 playSound('score');
 
+                // Kenaikan Level setiap 5 poin
                 if (score % 5 === 0) {
                     level++;
-                    this.dx += 0.35;
-                    this.gap = Math.max(92, this.gap - 4);
+                    this.dx += 0.3; // Pipa bergerak lebih cepat
+                    this.gap = Math.max(90, this.gap - 3); // Celah makin sempit
                     playSound('levelUp');
                 }
             }
 
+            // Hapus pipa yang keluar layar
             if (p.x + this.w < 0) {
                 this.position.shift();
                 i--;
@@ -346,86 +299,146 @@ const pipes = {
     },
 
     reset: function() {
-        this.position = []; this.dx = 2; this.gap = 125;
+        this.position = [];
+        this.dx = 2;
+        this.gap = 120;
     }
 };
 
-// --- BACKGROUND ---
+// --- Latar Belakang & Tanah ---
 const environment = {
     draw: function() {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
-        ctx.beginPath(); ctx.arc(70, 90, 22, 0, Math.PI * 2); ctx.arc(95, 80, 30, 0, Math.PI * 2); ctx.arc(120, 90, 22, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(270, 140, 18, 0, Math.PI * 2); ctx.arc(290, 130, 26, 0, Math.PI * 2); ctx.arc(310, 140, 18, 0, Math.PI * 2); ctx.fill();
+        // Langit/Awan
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.beginPath();
+        ctx.arc(60, 100, 25, 0, Math.PI * 2);
+        ctx.arc(90, 90, 35, 0, Math.PI * 2);
+        ctx.arc(120, 100, 25, 0, Math.PI * 2);
+        ctx.fill();
 
-        ctx.fillStyle = "#DDE26A"; ctx.fillRect(0, canvas.height - 70, canvas.width, 70);
-        ctx.fillStyle = "#85C1E9"; ctx.fillRect(0, canvas.height - 70, canvas.width, 10);
-        ctx.fillStyle = "#2ECC71"; ctx.fillRect(0, canvas.height - 70, canvas.width, 6);
+        ctx.beginPath();
+        ctx.arc(260, 180, 20, 0, Math.PI * 2);
+        ctx.arc(285, 170, 30, 0, Math.PI * 2);
+        ctx.arc(310, 180, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Tanah / Ground
+        ctx.fillStyle = "#DDE26A";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+        ctx.fillStyle = "#85C1E9";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 12);
+        ctx.fillStyle = "#2ECC71";
+        ctx.fillRect(0, canvas.height - 80, canvas.width, 8);
     }
 };
 
+// --- EFEK GAME OVER ---
 function gameOver() {
     gameState = 'GAMEOVER';
     playSound('hit');
 }
 
+// --- UI DISPLAY (Teks Skor & Level) ---
 function drawUI() {
-    ctx.fillStyle = "#FFF"; ctx.strokeStyle = "#000"; ctx.lineWidth = 3;
+    ctx.fillStyle = "#FFF";
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
 
     if (gameState === 'PLAYING') {
-        ctx.font = "bold 36px sans-serif";
-        ctx.strokeText(score, canvas.width / 2 - 10, 50); ctx.fillText(score, canvas.width / 2 - 10, 50);
+        // Skor Utama
+        ctx.font = "bold 35px sans-serif";
+        ctx.strokeText(score, canvas.width / 2 - 10, 50);
+        ctx.fillText(score, canvas.width / 2 - 10, 50);
 
+        // Indicator Level
         ctx.font = "bold 16px sans-serif";
-        ctx.strokeText("Level: " + level, 15, 30); ctx.fillText("Level: " + level, 15, 30);
-    } else if (gameState === 'START') {
+        ctx.strokeText("Level: " + level, 15, 30);
+        ctx.fillText("Level: " + level, 15, 30);
+    } 
+    else if (gameState === 'START') {
         ctx.textAlign = "center";
         ctx.font = "bold 24px sans-serif";
-        ctx.strokeText("BURUNG TERBANG", canvas.width / 2, 210); ctx.fillText("BURUNG TERBANG", canvas.width / 2, 210);
-        ctx.font = "15px sans-serif";
-        ctx.strokeText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260); ctx.fillText("Klik / Tekan Spasi untuk Mulai", canvas.width / 2, 260);
+        ctx.strokeText("BURUNG TERBANG", canvas.width / 2, 220);
+        ctx.fillText("BURUNG TERBANG", canvas.width / 2, 220);
+
+        ctx.font = "16px sans-serif";
+        ctx.strokeText("Tekan Spasi/Klik untuk Mulai", canvas.width / 2, 280);
+        ctx.fillText("Tekan Spasi/Klik untuk Mulai", canvas.width / 2, 280);
         ctx.textAlign = "start";
-    } else if (gameState === 'GAMEOVER') {
+    } 
+    else if (gameState === 'GAMEOVER') {
         ctx.textAlign = "center";
-        ctx.font = "bold 30px sans-serif"; ctx.fillStyle = "#E74C3C";
-        ctx.strokeText("GAME OVER", canvas.width / 2, 190); ctx.fillText("GAME OVER", canvas.width / 2, 190);
+        ctx.font = "bold 30px sans-serif";
+        ctx.fillStyle = "#E74C3C";
+        ctx.strokeText("GAME OVER", canvas.width / 2, 200);
+        ctx.fillText("GAME OVER", canvas.width / 2, 200);
 
-        ctx.fillStyle = "#FFF"; ctx.font = "20px sans-serif";
-        ctx.strokeText("Skor Akhir: " + score, canvas.width / 2, 250); ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 250);
-        ctx.strokeText("Level: " + level, canvas.width / 2, 285); ctx.fillText("Level: " + level, canvas.width / 2, 285);
+        // Panel Skor Akhir
+        ctx.fillStyle = "#FFF";
+        ctx.font = "20px sans-serif";
+        ctx.strokeText("Skor Akhir: " + score, canvas.width / 2, 260);
+        ctx.fillText("Skor Akhir: " + score, canvas.width / 2, 260);
 
-        ctx.font = "15px sans-serif";
-        ctx.strokeText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350); ctx.fillText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 350);
+        ctx.strokeText("Level Mencapai: " + level, canvas.width / 2, 295);
+        ctx.fillText("Level Mencapai: " + level, canvas.width / 2, 295);
+
+        ctx.font = "16px sans-serif";
+        ctx.strokeText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 360);
+        ctx.fillText("Klik/Spasi untuk Main Lagi", canvas.width / 2, 360);
         ctx.textAlign = "start";
     }
 }
 
+// --- INPUT CONTROL ---
 function handleInput() {
     initAudio();
+
     if (gameState === 'START') {
-        gameState = 'PLAYING'; bird.flap();
+        gameState = 'PLAYING';
+        bird.flap();
     } else if (gameState === 'PLAYING') {
         bird.flap();
     } else if (gameState === 'GAMEOVER') {
-        pipes.reset(); bird.reset();
-        score = 0; level = 1; gameState = 'PLAYING';
+        pipes.reset();
+        bird.reset();
+        score = 0;
+        level = 1;
+        gameState = 'PLAYING';
     }
 }
 
 document.addEventListener("keydown", function(e) {
-    if (e.code === "Space") { e.preventDefault(); handleInput(); }
+    if (e.code === "Space") {
+        e.preventDefault();
+        handleInput();
+    }
 });
-canvas.addEventListener("click", handleInput);
 
+canvas.addEventListener("click", function() {
+    handleInput();
+});
+
+// --- GAME LOOP ---
 function loop() {
+    // 1. Clear Screen & Draw Background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     environment.draw();
-    pipes.draw(); pipes.update();
-    bird.draw(); bird.update();
+
+    // 2. Update & Draw Entities
+    pipes.draw();
+    pipes.update();
+
+    bird.draw();
+    bird.update();
+
+    // 3. Draw Interface
     drawUI();
+
     frames++;
     requestAnimationFrame(loop);
 }
 
+// Jalankan Loop
 loop();
 </script>
 </body>
